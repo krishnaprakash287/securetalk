@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --background: 8 11 17;
+    --foreground: 241 245 249;
+    --border: 30 41 59;
+  }
+
+  body {
+    @apply bg-[#080b11] text-slate-100 font-sans antialiased min-h-screen selection:bg-emerald-500/20 selection:text-emerald-300;
+    overflow-x: hidden;
+  }
+
+  /* Ultra-sleek custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+  }
+
+  /* Accessible focus states */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-emerald-500/80 ring-offset-2 ring-offset-[#080b11];
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Elevated Action Buttons */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white font-medium text-sm transition-all duration-150 shadow-md shadow-emerald-950/40 border border-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 focus-visible:ring-2 focus-visible:ring-emerald-500;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#111726] hover:bg-[#182033] active:scale-[0.98] text-slate-200 hover:text-white border border-white/[0.08] hover:border-white/[0.15] font-medium text-sm transition-all duration-150 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/50 active:scale-[0.98] text-rose-300 hover:text-rose-200 border border-rose-800/40 font-medium text-sm transition-all duration-150 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.05] transition-all duration-150 text-sm;
+  }
+
+  /* Form Inputs */
+  .input-field {
+    @apply w-full px-3.5 py-2.5 bg-[#0d121c] border border-white/[0.08] rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:border-emerald-500/80 focus:bg-[#0f1522] focus:ring-1 focus:ring-emerald-500/80 transition-all duration-150 shadow-inner;
+  }
+
+  /* Card Surfaces */
+  .card {
+    @apply bg-[#0e131f] border border-white/[0.07] rounded-xl p-5 sm:p-6 shadow-lg shadow-black/20;
+  }
+
+  .glass-card {
+    @apply bg-[#0e131f]/80 backdrop-blur-md border border-white/[0.08] rounded-xl p-5 sm:p-6 shadow-xl shadow-black/30;
+  }
+
+  .glass-panel {
+    @apply backdrop-blur-xl bg-[#080b11]/85 border border-white/[0.06];
+  }
+
+  /* Privacy Badges */
+  .badge-e2ee {
+    @apply inline-flex items-center gap-1 font-mono text-[10px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded-full;
+  }
+
+  .badge-neutral {
+    @apply inline-flex items-center gap-1 font-mono text-[10px] text-slate-400 bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-full;
+  }
+}
