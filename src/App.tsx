@@ -2,8 +2,8 @@
 // SecureTalk Main Application Component & Router Configuration
 // ==============================================================================
 
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ChatProvider } from './context/ChatContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -28,9 +28,30 @@ import { SecurityReportPage } from './pages/SecurityReportPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
 
+const AuthRecoveryListener: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    const search = window.location.search;
+    const isRecovery =
+      hash.includes('type=recovery') ||
+      (hash.includes('access_token') && !location.pathname.startsWith('/chat')) ||
+      search.includes('type=recovery');
+
+    if (isRecovery && location.pathname !== '/reset-password') {
+      navigate(`/reset-password${search}${hash}`, { replace: true });
+    }
+  }, [location, navigate]);
+
+  return null;
+};
+
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
+      <AuthRecoveryListener />
       <DatabaseNoticeBanner />
       <AuthProvider>
         <ChatProvider>
