@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: securetalk
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_SUPABASE_URL
+        value: https://kpyuxeeefwyxlmsxepjv.supabase.co
+      - key: VITE_SUPABASE_ANON_KEY
+        value: sb_publishable_CuJrfXYwIbsQg3MBLaO70Q_MLM69mYg
