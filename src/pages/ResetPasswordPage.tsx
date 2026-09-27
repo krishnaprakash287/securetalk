@@ -36,6 +36,16 @@ export const ResetPasswordPage: React.FC = () => {
     };
 
     checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || Boolean(session)) {
+        setHasValidSession(true);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

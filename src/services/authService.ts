@@ -265,8 +265,10 @@ export const authService = {
     const val = validateEmail(email);
     if (!val.valid) throw new Error(val.error);
 
+    // Using origin ensures static site hosts (Render, Vercel) always return 200 OK for the root route,
+    // and AuthRecoveryListener in App.tsx seamlessly directs to /reset-password with recovery tokens intact.
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${window.location.origin}`,
     });
     if (error) {
       throw Object.assign(new Error(sanitizeErrorMessage(error)), {
