@@ -71,8 +71,11 @@ export function sanitizeErrorMessage(error: unknown, fallback = 'An unexpected e
   if (msg.includes('User already registered') || msg.includes('unique constraint') || msg.includes('23505')) {
     return 'This username or email is already in use.';
   }
-  if (/error sending confirmation (mail|email)/i.test(msg)) {
-    return 'Supabase email limit reached ("Error sending confirmation mail"). To fix this, turn OFF "Confirm email" in your Supabase Dashboard under Authentication > Providers > Email, or configure custom SMTP.';
+  if (
+    /error sending (recovery|reset|confirmation|forget|email|mail)/i.test(msg) ||
+    /error sending.*(email|mail)/i.test(msg)
+  ) {
+    return 'Supabase email limit exceeded ("Error sending recovery email"). Supabase free tier limits email delivery to 2-3 emails per hour. To send emails reliably, enable Custom SMTP (e.g. Gmail or Resend) in Supabase Dashboard > Project Settings > Authentication > SMTP Settings.';
   }
   if (msg.includes('Email not confirmed') || msg.includes('email_not_confirmed')) {
     return 'Please confirm your email address before signing in.';
