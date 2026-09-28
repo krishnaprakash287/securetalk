@@ -71,6 +71,9 @@ export function sanitizeErrorMessage(error: unknown, fallback = 'An unexpected e
   if (msg.includes('User already registered') || msg.includes('unique constraint') || msg.includes('23505')) {
     return 'This username or email is already in use.';
   }
+  if (/error sending confirmation (mail|email)/i.test(msg)) {
+    return 'Supabase email limit reached ("Error sending confirmation mail"). To fix this, turn OFF "Confirm email" in your Supabase Dashboard under Authentication > Providers > Email, or configure custom SMTP.';
+  }
   if (msg.includes('Email not confirmed') || msg.includes('email_not_confirmed')) {
     return 'Please confirm your email address before signing in.';
   }

@@ -52,15 +52,18 @@ export const RegisterPage: React.FC = () => {
 
     try {
       setLoading(true);
-      await authService.register({
+      const result = await authService.register({
         email,
         username,
         password,
         displayName: displayName.trim() || username,
       });
 
-      // Navigate to chat
-      navigate('/chats');
+      if (!result.session) {
+        navigate('/verify-email', { state: { email } });
+      } else {
+        navigate('/chats');
+      }
     } catch (err) {
       setError(sanitizeErrorMessage(err));
     } finally {

@@ -26,7 +26,7 @@ export const authService = {
   /**
    * Registers a new user with Supabase Auth and generates local cryptographic keys.
    */
-  async register({ email, username, password, displayName }: RegisterParams): Promise<{ user: any; profile: Profile }> {
+  async register({ email, username, password, displayName }: RegisterParams): Promise<{ user: any; profile: Profile; session: any | null }> {
     // 1. Client-side input validation
     const emailVal = validateEmail(email);
     if (!emailVal.valid) throw new Error(emailVal.error);
@@ -64,6 +64,7 @@ export const authService = {
       email: email.trim().toLowerCase(),
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/chats`,
         data: {
           username: normalizedUser,
           display_name: cleanDisplayName,
@@ -87,57 +88,84 @@ export const authService = {
       createdAt: new Date().toISOString(),
     });
 
-    // 6. Insert Profile record
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: userId,
-        username: normalizedUser,
-        display_name: cleanDisplayName,
-      })
-      .select()
-      .single();
+    let profileData: Profile | null = null;
 
-    if (profileError) {
-      console.error('Profile creation error:', profileError);
-    }
+    // If an active session is established (email confirmation disabled or auto-confirmed):
+    if (authData.session) {
+      // 6. Insert Profile record
+      const { data: insertedProfile, error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          username: normalizedUser,
+          display_name: cleanDisplayName,
+        })
+        .select()
+        .single();
 
-    // 7. Insert default User Settings
-    await supabase.from('user_settings').insert({
-      user_id: userId,
-      read_receipts: true,
-      typing_indicators: true,
-      online_status: true,
-      last_seen: true,
-      allow_chat_requests: true,
-      profile_discoverable: true,
-    });
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+      } else {
+        profileData = insertedProfile;
+      }
 
-    // 8. Publish the PUBLIC key only (for E2EE key agreement)
-    await supabase.from('public_keys').upsert(
-      {
+      // 7. Insert default User Settings
+      await supabase.from('user_settings').insert({
         user_id: userId,
-        public_key: exportedPublicKey,
-        key_version: 1,
-      },
-      { onConflict: 'user_id,key_version' }
-    );
+        read_receipts: true,
+        typing_indicators: true,
+        online_status: true,
+        last_seen: true,
+        allow_chat_requests: true,
+        profile_discoverable: true,
+      });
 
-    // 9. Register current device session
-    await this.registerCurrentDevice(userId);
+      // 8. Publish the PUBLIC key only (for E2EE key agreement)
+      await supabase.from('public_keys').upsert(
+        {
+          user_id: userId,
+          public_key: exportedPublicKey,
+          key_version: 1,
+        },
+        { onConflict: 'user_id,key_version' }
+      );
+
+      // 9. Register current device session
+      await this.registerCurrentDevice(userId);
+    }
 
     return {
       user: authData.user,
+      session: authData.session,
       profile: profileData || {
         id: userId,
         username: normalizedUser,
         display_name: cleanDisplayName,
         avatar_url: null,
         bio: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      } as unknown as Profile,
     };
+  },
+
+  /**
+   * Resends signup confirmation email.
+   */
+  async resendConfirmation(email: string): Promise<void> {
+    const val = validateEmail(email);
+    if (!val.valid) throw new Error(val.error);
+
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email.trim().toLowerCase(),
+      options: {
+        emailRedirectTo: `${window.location.origin}/chats`,
+      },
+    });
+    if (error) {
+      throw new Error(sanitizeErrorMessage(error));
+    }
   },
 
   /**
